@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LearnLoop — Engineering Edition</title>
+
+  <!-- ========================================================
+    FONTS: We use Google Fonts (free)
+    - "Syne" for bold headings (engineering blueprint feel)
+    - "DM Sans" for easy-to-read body text
+    - "Caveat" for handwritten accent labels
+  ======================================================== -->
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=Caveat:wght@500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =========================================================
+       CSS VARIABLES — change these to retheme the whole site!
+       Think of these like settings at the top of a config file.
+    ========================================================= */
+    :root {
+      --bg:          #0f1923;   /* dark navy background */
+      --surface:     #1a2535;   /* slightly lighter surface */
+      --surface2:    #22304a;   /* card backgrounds */
+      --border:      rgba(255,255,255,0.07);
+      --text:        #e8edf5;   /* main text (off-white) */
+      --muted:       #7a8fa8;   /* secondary text (gray-blue) */
+
+      /* Accent colors — one per engineering discipline */
+      --civil:       #f5a623;   /* amber — civil */
+      --mechanical:  #4fc3f7;   /* sky blue — mechanical */
+      --electrical:  #66bb6a;   /* green — electrical */
+      --computer:    #ce93d8;   /* purple — computer */
+      --accent:      #f5a623;   /* default accent (amber) */
+
+      --danger:      #ef5350;
+      --success:     #66bb6a;
+    }
+
+    /* =========================================================
+       RESET — removes browser default padding/margin
+    ========================================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* =========================================================
+       TOP NAVIGATION BAR
+    ========================================================= */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 62px;
+      position: sticky;
+      top: 0;
+      z-index: 100; /* keeps nav above everything else */
+    }
+
+    /* Logo text */
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.35rem;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+    .logo span { color: var(--text); }
+
+    /* Nav tab buttons */
+    .nav-tabs { display: flex; gap: 4px; list-style: none; flex-wrap: wrap; }
+
+    .nav-tabs button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 7px 13px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.18s;
+      white-space: nowrap;
+    }
+    .nav-tabs button:hover { color: var(--text); background: var(--border); }
+    /* Active tab gets the accent color */
+    .nav-tabs button.active { color: var(--bg); background: var(--accent); font-weight: 700; }
+
+    /* =========================================================
+       PAGE SYSTEM — only one page shows at a time
+    ========================================================= */
+    .page { display: none; padding: 2.5rem 2rem; max-width: 1100px; margin: 0 auto; }
+    .page.active {
+      display: block;
+      animation: fadeUp 0.28s ease; /* smooth page transition */
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =========================================================
+       REUSABLE BUTTON STYLES
+       Use class="btn btn-[color]" on any <button>
+    ========================================================= */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 20px;
+      border-radius: 50px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.18s;
+      text-decoration: none;
+    }
+    .btn:hover { transform: translateY(-1px); opacity: 0.92; }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-amber    { background: var(--civil);      color: #1a1000; }
+    .btn-blue     { background: var(--mechanical); color: #001a28; }
+    .btn-green    { background: var(--electrical); color: #001a05; }
+    .btn-purple   { background: var(--computer);   color: #1a0028; }
+    .btn-outline  { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-danger   { background: var(--danger); color: #fff; }
+    .btn-sm       { padding: 7px 15px; font-size: 0.8rem; }
+    .btn-block    { width: 100%; justify-content: center; border-radius: 12px; }
+
+    /* =========================================================
+       CARD — reusable container box
+    ========================================================= */
+    .card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+
+    /* =========================================================
+       SECTION HEADER — title + subtitle at top of each page
+    ========================================================= */
+    .section-header { margin-bottom: 1.75rem; }
+    .section-header h2 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.7rem;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+    }
+    .section-header p { color: var(--muted); font-size: 0.92rem; }
+
+    /* =========================================================
+       DISCIPLINE FILTER CHIPS
+       Used at the top of Circles and Tutoring pages
+    ========================================================= */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+      align-items: center;
+    }
+
+    .chip {
+      padding: 7px 16px;
+      border-radius: 50px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .chip:hover { border-color: var(--accent); color: var(--accent); }
+    .chip.active { background: var(--accent); color: #1a1000; border-color: var(--accent); }
+
+    /* Discipline-specific active chip colors */
+    .chip.active[data-disc="civil"]      { background: var(--civil);      color: #1a1000; border-color: var(--civil); }
+    .chip.active[data-disc="mechanical"] { background: var(--mechanical); color: #001a28; border-color: var(--mechanical); }
+    .chip.active[data-disc="electrical"] { background: var(--electrical); color: #001a05; border-color: var(--electrical); }
+    .chip.active[data-disc="computer"]   { background: var(--computer);   color: #1a0028; border-color: var(--computer); }
+
+    /* Search bar */
+    .search-input {
+      flex: 1; min-width: 200px;
+      padding: 9px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 50px;
+      background: var(--surface);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.18s;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .search-input::placeholder { color: var(--muted); }
+
+    /* =========================================================
+       TAG BADGE — small colored label
+    ========================================================= */
+    .tag {
+      display: inline-block;
+      padding: 3px 11px;
+      border-radius: 50px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      margin: 2px 3px 2px 0;
+    }
+    .tag-civil      { background: rgba(245,166,35,0.15);  color: var(--civil); }
+    .tag-mechanical { background: rgba(79,195,247,0.15);  color: var(--mechanical); }
+    .tag-electrical { background: rgba(102,187,106,0.15); color: var(--electrical); }
+    .tag-computer   { background: rgba(206,147,216,0.15); color: var(--computer); }
+    .tag-live       { background: rgba(102,187,106,0.15); color: var(--electrical); }
+    .tag-open       { background: rgba(245,166,35,0.15);  color: var(--civil); }
+    .tag-full       { background: rgba(122,143,168,0.12); color: var(--muted); }
+
+    /* =========================================================
+       GRID LAYOUTS
+    ========================================================= */
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+
+    /* =========================================================
+       HOME PAGE — hero section
+    ========================================================= */
+    .hero {
+      text-align: center;
+      padding: 4rem 1rem 3.5rem;
+    }
+    .hero-eyebrow {
+      font-family: 'Caveat', cursive;
+      font-size: 1.2rem;
+      color: var(--civil);
+      margin-bottom: 0.75rem;
+    }
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.4rem, 6vw, 3.8rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1.1rem;
+    }
+    .hero h1 em { font-style: normal; color: var(--mechanical); }
+    .hero p { font-size: 1.05rem; color: var(--muted); max-width: 540px; margin: 0 auto 2rem; }
+    .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    /* Discipline cards on home */
+    .disc-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+      text-align: center;
+    }
+    .disc-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.15); box-shadow: 0 12px 32px rgba(0,0,0,0.3); }
+    .disc-icon { font-size: 2.2rem; margin-bottom: 0.75rem; }
+    .disc-card h3 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 0.4rem; }
+    .disc-card p  { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+    /* Stats row on home */
+    .stats-row { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem; }
+    .stat { text-align: center; }
+    .stat-num { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; }
+    .stat-label { font-size: 0.8rem; color: var(--muted); }
+
+    /* =========================================================
+       CIRCLE CARDS — Peer Circles page
+    ========================================================= */
+    .circle-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.35rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      transition: border-color 0.18s;
+    }
+    .circle-card:hover { border-color: rgba(255,255,255,0.14); }
+    .circle-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .circle-card h3 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.97rem; color: var(--text); }
+    .circle-card p  { font-size: 0.84rem; color: var(--muted); line-height: 1.55; }
+
+    /* Member avatar cluster */
+    .avatars { display: flex; }
+    .av {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--surface2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.68rem; font-weight: 700; color: #000;
+      margin-left: -7px;
+    }
+    .av:first-child { margin-left: 0; }
+
+    .circle-footer { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: var(--muted); }
+
+    /* =========================================================
+       TUTOR CARDS — Private Tutoring page
+    ========================================================= */
+    .tutor-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.35rem;
+      transition: border-color 0.18s;
+    }
+    .tutor-card:hover { border-color: rgba(255,255,255,0.14); }
+    .tutor-top { display: flex; gap: 13px; align-items: flex-start; margin-bottom: 0.9rem; }
+    .tutor-av {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .tutor-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.97rem; margin-bottom: 2px; }
+    .tutor-sub  { font-size: 0.8rem; color: var(--muted); margin-bottom: 5px; }
+    .rating     { font-size: 0.78rem; font-weight: 600; }
+    .tutor-bio  { font-size: 0.84rem; color: var(--muted); line-height: 1.55; margin-bottom: 0.9rem; }
+    .tutor-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* =========================================================
+       VIDEO ROOM — embedded Whereby video call
+    ========================================================= */
+    .video-room {
+      display: none; /* hidden until someone joins */
+      background: #000;
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 1.75rem;
+      border: 1px solid var(--border);
+    }
+    .video-room.open { display: block; animation: fadeUp 0.25s ease; }
+
+    .video-header {
+      background: var(--surface);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.9rem 1.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .video-header h3 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; }
+
+    /* Blinking "LIVE" dot */
+    .live-badge { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--electrical); font-weight: 600; }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--electrical); animation: blink 1.4s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .video-iframe-wrap { width: 100%; aspect-ratio: 16/9; }
+    .video-iframe-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
+
+    /* =========================================================
+       MODAL — popup dialog (create circle, schedule booking)
+    ========================================================= */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65);
+      z-index: 200;
+      align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      width: 100%; max-width: 480px;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal h2 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.35rem; margin-bottom: 1.2rem; }
+    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 1.25rem; }
+
+    /* Form elements inside modals */
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-size: 0.83rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .field input, .field textarea, .field select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.18s;
+    }
+    .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); }
+    .field textarea { resize: vertical; min-height: 80px; }
+    .field select option { background: var(--surface); }
+
+    /* Time slot pills for scheduling */
+    .slot-grid { display: flex; flex-wrap: wrap; gap: 7px; }
+    .slot {
+      padding: 6px 13px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      font-size: 0.78rem; font-weight: 600;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .slot:hover { border-color: var(--accent); color: var(--accent); }
+    .slot.sel   { background: var(--accent); color: #1a1000; border-color: var(--accent); }
+
+    /* =========================================================
+       SCHEDULED BOOKINGS PAGE
+    ========================================================= */
+    .booking-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: border-color 0.18s;
+    }
+    .booking-card:hover { border-color: rgba(255,255,255,0.14); }
+
+    .booking-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .booking-info { flex: 1; }
+    .booking-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.92rem; margin-bottom: 3px; }
+    .booking-meta  { font-size: 0.8rem; color: var(--muted); }
+    .booking-time  { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.85rem; text-align: right; }
+
+    .bookings-empty {
+      text-align: center; padding: 3rem;
+      color: var(--muted); font-size: 0.9rem;
+    }
+    .bookings-empty .em { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+    /* =========================================================
+       NOTEBOOK PAGE
+    ========================================================= */
+    .notebook-layout {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    /* Left sidebar: list of notes */
+    .nb-sidebar {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .nb-sidebar-head {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .nb-sidebar-head h3 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem; }
+    .note-list { list-style: none; }
+    .note-list li {
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .note-list li:hover, .note-list li.active { background: var(--surface); }
+    .note-list li:last-child { border-bottom: none; }
+    .note-list .nt { font-weight: 600; font-size: 0.84rem; margin-bottom: 2px; }
+    .note-list .nm { font-size: 0.73rem; color: var(--muted); }
+
+    /* Right panel: note content */
+    .nb-main {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.75rem;
+      min-height: 520px;
+    }
+    .nb-note-head {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding-bottom: 1.25rem; margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .nb-note-head h2 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.25rem; }
+    .nb-note-head p  { font-size: 0.8rem; color: var(--muted); margin-top: 3px; }
+
+    /* Tabs inside the note: Summary | Quiz | AI Practice */
+    .note-tabs { display: flex; gap: 4px; margin-bottom: 1.25rem; }
+    .note-tab {
+      padding: 7px 16px; border-radius: 8px;
+      border: none; background: var(--surface);
+      color: var(--muted); font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+    }
+    .note-tab:hover { color: var(--text); }
+    .note-tab.active { background: var(--accent); color: #1a1000; }
+    .note-tab-panel { display: none; }
+    .note-tab-panel.active { display: block; }
+
+    /* Concept list items */
+    .concept-list { list-style: none; }
+    .concept-list li {
+      display: flex; gap: 10px; align-items: flex-start;
+      font-size: 0.875rem; line-height: 1.6; margin-bottom: 8px; color: var(--text);
+    }
+    .concept-list li::before { content: '→'; color: var(--mechanical); flex-shrink: 0; margin-top: 1px; }
+
+    /* Flashcards (flip on click) */
+    .flashcard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(185px, 1fr)); gap: 11px; }
+    .flashcard {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      cursor: pointer;
+      min-height: 85px;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center;
+      font-size: 0.84rem; line-height: 1.5; color: var(--text);
+      transition: all 0.22s;
+    }
+    .flashcard:hover { border-color: var(--accent); }
+    .flashcard.flipped { background: var(--civil); color: #1a1000; border-color: var(--civil); font-weight: 600; }
+
+    /* =========================================================
+       QUIZ — Multiple Choice Questions
+    ========================================================= */
+    .mc-question { margin-bottom: 1.5rem; }
+    .mc-q-text { font-size: 0.92rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--text); }
+
+    .mc-options { display: flex; flex-direction: column; gap: 8px; }
+    .mc-opt {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.15s;
+      color: var(--text);
+    }
+    .mc-opt:hover { border-color: var(--accent); }
+    .mc-opt.correct  { border-color: var(--electrical); background: rgba(102,187,106,0.1); color: var(--electrical); }
+    .mc-opt.wrong    { border-color: var(--danger); background: rgba(239,83,80,0.1); color: var(--danger); }
+    .mc-opt.selected { border-color: var(--mechanical); }
+
+    .mc-letter {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--surface); border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+    }
+
+    .mc-feedback { margin-top: 8px; font-size: 0.82rem; font-style: italic; }
+    .mc-feedback.ok   { color: var(--electrical); }
+    .mc-feedback.bad  { color: var(--danger); }
+
+    /* Quiz score banner */
+    .quiz-score {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.88rem; color: var(--muted);
+    }
+    .quiz-score strong { color: var(--civil); font-family: 'Syne', sans-serif; font-size: 1.1rem; }
+
+    /* =========================================================
+       SHORT ANSWER — 250-word minimum
+    ========================================================= */
+    .sa-question { margin-bottom: 1.5rem; }
+    .sa-q-text { font-size: 0.92rem; font-weight: 600; margin-bottom: 0.75rem; }
+    .sa-textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      min-height: 160px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.18s;
+      line-height: 1.6;
+    }
+    .sa-textarea:focus { border-color: var(--accent); }
+    .sa-textarea::placeholder { color: var(--muted); }
+
+    .word-count { font-size: 0.78rem; color: var(--muted); margin-top: 6px; display: flex; justify-content: space-between; }
+    .word-count.ok    { color: var(--electrical); }
+    .word-count.warn  { color: var(--civil); }
+    .wc-bar-bg { height: 3px; background: var(--border); border-radius: 3px; margin-top: 6px; overflow: hidden; }
+    .wc-bar    { height: 100%; border-radius: 3px; transition: width 0.3s, background 0.3s; }
+
+    /* =========================================================
+       AI PRACTICE SECTION inside Notebook
+    ========================================================= */
+    .ai-section { }
+    .ai-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1.25rem; align-items: center; }
+
+    /* Conversation thread */
+    .ai-thread { display: flex; flex-direction: column; gap: 12px; margin-bottom: 1.25rem; max-height: 400px; overflow-y: auto; padding-right: 4px; }
+
+    .ai-bubble {
+      padding: 12px 16px;
+      border-radius: 14px;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      max-width: 90%;
+    }
+    .ai-bubble.ai   { background: var(--surface); border: 1px solid var(--border); color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; }
+    .ai-bubble.user { background: rgba(79,195,247,0.12); border: 1px solid rgba(79,195,247,0.2); color: var(--text); align-self: flex-end; border-bottom-right-radius: 4px; }
+    .ai-bubble.loading { color: var(--muted); font-style: italic; }
+
+    .ai-input-row { display: flex; gap: 8px; }
+    .ai-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 50px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.18s;
+    }
+    .ai-input:focus { border-color: var(--mechanical); }
+    .ai-input::placeholder { color: var(--muted); }
+
+    /* =========================================================
+       TOAST NOTIFICATION — popup at bottom-right
+    ========================================================= */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 13px 20px;
+      border-radius: 14px;
+      font-size: 0.85rem; font-weight: 500;
+      z-index: 500;
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.3s;
+      max-width: 300px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* =========================================================
+       EMPTY STATE — shown when a list is empty
+    ========================================================= */
+    .empty { text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: 0.9rem; }
+    .empty .em { font-size: 2.8rem; margin-bottom: 0.75rem; }
+
+    /* =========================================================
+       UTILITY
+    ========================================================= */
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    .mb1 { margin-bottom: 1rem; }
+    .gap-list { display: flex; flex-direction: column; gap: 10px; }
+    .note-section-title {
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.78rem;
+      text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    /* Responsive: stack notebook on small screens */
+    @media (max-width: 700px) {
+      .notebook-layout { grid-template-columns: 1fr; }
+      nav { padding: 0 1rem; }
+      .nav-tabs button { padding: 5px 9px; font-size: 0.72rem; }
+      .page { padding: 1.5rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- =====================================================
+     NAVIGATION BAR
+     showPage('id') switches which page is visible
+===================================================== -->
+<nav>
+  <div class="logo">Learn<span>Loop</span> <span style="color:var(--muted);font-size:0.75rem;font-weight:400">Engineering</span></div>
+  <ul class="nav-tabs">
+    <li><button class="active" onclick="showPage('home')">🏠 Home</button></li>
+    <li><button onclick="showPage('circles')">🔵 Peer Circles</button></li>
+    <li><button onclick="showPage('private')">🎯 Private Tutoring</button></li>
+    <li><button onclick="showPage('bookings')">📅 My Bookings</button></li>
+    <li><button onclick="showPage('notebook')">📓 My Notebook</button></li>
+  </ul>
+</nav>
+
+
+<!-- =====================================================
+     PAGE 1: HOME
+===================================================== -->
+<div class="page active" id="page-home">
+
+  <div class="hero">
+    <p class="hero-eyebrow">✦ Free tutoring for future engineers</p>
+    <h1>Build knowledge.<br><em>Engineer your future.</em></h1>
+    <p>Join peer circles, book one-on-one sessions, and practice with AI-powered quizzes — all free, all in your browser.</p>
+    <div class="hero-btns">
+      <button class="btn btn-amber" onclick="showPage('circles')">Join a Circle</button>
+      <button class="btn btn-blue"  onclick="showPage('private')">Find a Tutor</button>
+      <button class="btn btn-outline" onclick="showPage('notebook')">My Notebook</button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat"><div class="stat-num" style="color:var(--civil)">4</div><div class="stat-label">Disciplines</div></div>
+      <div class="stat"><div class="stat-num" style="color:var(--mechanical)">24</div><div class="stat-label">Active Circles</div></div>
+      <div class="stat"><div class="stat-num" style="color:var(--electrical)">18</div><div class="stat-label">Tutors</div></div>
+      <div class="stat"><div class="stat-num" style="color:var(--computer)">100%</div><div class="stat-label">Free</div></div>
+    </div>
+  </div>
+
+  <!-- 4 Discipline Cards -->
+  <div class="grid-4" style="margin-bottom:2rem">
+    <div class="disc-card" onclick="showPage('circles');filterByDisc('civil')">
+      <div class="disc-icon">🏗️</div>
+      <h3 style="color:var(--civil)">Civil</h3>
+      <p>Structures, materials, fluid mechanics, transportation, geotechnics</p>
+    </div>
+    <div class="disc-card" onclick="showPage('circles');filterByDisc('mechanical')">
+      <div class="disc-icon">⚙️</div>
+      <h3 style="color:var(--mechanical)">Mechanical</h3>
+      <p>Thermodynamics, dynamics, manufacturing, machine design, CAD</p>
+    </div>
+    <div class="disc-card" onclick="showPage('circles');filterByDisc('electrical')">
+      <div class="disc-icon">⚡</div>
+      <h3 style="color:var(--electrical)">Electrical</h3>
+      <p>Circuits, signals, power systems, electromagnetics, control theory</p>
+    </div>
+    <div class="disc-card" onclick="showPage('circles');filterByDisc('computer')">
+      <div class="disc-icon">💻</div>
+      <h3 style="color:var(--computer)">Computer</h3>
+      <p>Algorithms, OS, networks, software engineering, data structures</p>
+    </div>
+  </div>
+
+  <!-- CTA Banner -->
+  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:16px;padding:2rem;display:flex;flex-wrap:wrap;gap:1.5rem;align-items:center;justify-content:space-between;">
+    <div>
+      <p style="font-family:'Caveat',cursive;color:var(--civil);font-size:1.1rem;margin-bottom:0.3rem">Ready to start?</p>
+      <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem">Create a peer circle in 30 seconds.</h2>
+    </div>
+    <button class="btn btn-amber" onclick="showPage('circles');openCreateModal()">Start a Circle →</button>
+  </div>
+</div>
+
+
+<!-- =====================================================
+     PAGE 2: PEER CIRCLES
+===================================================== -->
+<div class="page" id="page-circles">
+
+  <div class="section-header">
+    <h2>Peer Learning Circles</h2>
+    <p>Small groups (3–5 students) studying together via live video. Free, no sign-up required.</p>
+  </div>
+
+  <!-- Filter & Search bar -->
+  <div class="filter-bar">
+    <input class="search-input" type="text" id="circle-search" placeholder="Search circles..." oninput="renderCircles()">
+    <button class="chip active" data-filter="all"        onclick="setCircleFilter(this,'all')">All</button>
+    <button class="chip" data-filter="civil"      data-disc="civil"      onclick="setCircleFilter(this,'civil')">🏗️ Civil</button>
+    <button class="chip" data-filter="mechanical" data-disc="mechanical" onclick="setCircleFilter(this,'mechanical')">⚙️ Mechanical</button>
+    <button class="chip" data-filter="electrical" data-disc="electrical" onclick="setCircleFilter(this,'electrical')">⚡ Electrical</button>
+    <button class="chip" data-filter="computer"   data-disc="computer"   onclick="setCircleFilter(this,'computer')">💻 Computer</button>
+    <button class="btn btn-amber btn-sm" onclick="openCreateModal()">+ New Circle</button>
+  </div>
+
+  <!-- Video call appears here when someone joins -->
+  <div class="video-room" id="circle-video">
+    <div class="video-header">
+      <h3 id="circle-video-title">Study Room</h3>
+      <div style="display:flex;gap:12px;align-items:center">
+        <div class="live-badge"><div class="live-dot"></div> Live</div>
+        <button class="btn btn-danger btn-sm" onclick="leaveCircle()">Leave</button>
+      </div>
+    </div>
+    <div class="video-iframe-wrap">
+      <iframe id="circle-iframe" allow="camera;microphone;fullscreen;display-capture" allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <!-- Circle cards rendered by JS -->
+  <div class="grid-2" id="circles-grid"></div>
+</div>
+
+
+<!-- =====================================================
+     PAGE 3: PRIVATE TUTORING
+===================================================== -->
+<div class="page" id="page-private">
+
+  <div class="section-header">
+    <h2>Private Tutoring</h2>
+    <p>One-on-one video sessions with volunteer engineers and students. Book a slot or jump in now.</p>
+  </div>
+
+  <div class="filter-bar">
+    <input class="search-input" type="text" id="tutor-search" placeholder="Search tutors..." oninput="renderTutors()">
+    <button class="chip active" data-tfilter="all"        onclick="setTutorFilter(this,'all')">All</button>
+    <button class="chip" data-tfilter="civil"      data-disc="civil"      onclick="setTutorFilter(this,'civil')">🏗️ Civil</button>
+    <button class="chip" data-tfilter="mechanical" data-disc="mechanical" onclick="setTutorFilter(this,'mechanical')">⚙️ Mechanical</button>
+    <button class="chip" data-tfilter="electrical" data-disc="electrical" onclick="setTutorFilter(this,'electrical')">⚡ Electrical</button>
+    <button class="chip" data-tfilter="computer"   data-disc="computer"   onclick="setTutorFilter(this,'computer')">💻 Computer</button>
+  </div>
+
+  <!-- Private video room -->
+  <div class="video-room" id="private-video">
+    <div class="video-header">
+      <h3 id="private-video-title">Private Session</h3>
+      <div style="display:flex;gap:12px;align-items:center">
+        <div class="live-badge"><div class="live-dot"></div> In Session</div>
+        <button class="btn btn-danger btn-sm" onclick="leavePrivate()">End Session</button>
+      </div>
+    </div>
+    <div class="video-iframe-wrap">
+      <iframe id="private-iframe" allow="camera;microphone;fullscreen;display-capture" allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <div class="grid-2" id="tutors-grid"></div>
+</div>
+
+
+<!-- =====================================================
+     PAGE 4: MY BOOKINGS
+===================================================== -->
+<div class="page" id="page-bookings">
+
+  <div class="section-header flex-between" style="flex-wrap:wrap;gap:1rem">
+    <div>
+      <h2>My Bookings</h2>
+      <p>All your scheduled private tutoring sessions in one place.</p>
+    </div>
+    <button class="btn btn-amber btn-sm" onclick="showPage('private')">+ Book a Tutor</button>
+  </div>
+
+  <!-- Upcoming bookings list -->
+  <div style="margin-bottom:2rem">
+    <p class="note-section-title" style="margin-bottom:1rem">Upcoming Sessions</p>
+    <div class="gap-list" id="bookings-upcoming"></div>
+  </div>
+
+  <!-- Past bookings -->
+  <div>
+    <p class="note-section-title" style="margin-bottom:1rem">Past Sessions</p>
+    <div class="gap-list" id="bookings-past"></div>
+  </div>
+</div>
+
+
+<!-- =====================================================
+     PAGE 5: MY NOTEBOOK
+===================================================== -->
+<div class="page" id="page-notebook">
+
+  <div class="section-header flex-between" style="flex-wrap:wrap;gap:1rem">
+    <div>
+      <h2>My Notebook</h2>
+      <p>Notes from every session. Study with flashcards, quizzes, and AI practice.</p>
+    </div>
+    <button class="btn btn-amber btn-sm" onclick="openAddNote()">+ Add Note</button>
+  </div>
+
+  <!-- Add Note form (hidden by default) -->
+  <div id="add-note-form" style="display:none;margin-bottom:1.5rem">
+    <div class="card">
+      <h3 style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:1rem">New Session Note</h3>
+      <div class="field"><label>Title</label><input type="text" id="nf-title" placeholder="e.g. Statics — Truss Analysis"></div>
+      <div class="field"><label>Discipline</label>
+        <select id="nf-disc">
+          <option value="civil">Civil Engineering</option>
+          <option value="mechanical">Mechanical Engineering</option>
+          <option value="electrical">Electrical Engineering</option>
+          <option value="computer">Computer Engineering</option>
+        </select>
+      </div>
+      <div class="field"><label>Key Concepts (one per line)</label><textarea id="nf-concepts" placeholder="Free body diagrams isolate a single body&#10;Sum of forces = 0 in static equilibrium"></textarea></div>
+      <div class="field"><label>Action Items (one per line)</label><textarea id="nf-actions" placeholder="Complete problem set 4&#10;Review textbook chapter 6"></textarea></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-outline btn-sm" onclick="closeAddNote()">Cancel</button>
+        <button class="btn btn-amber btn-sm" onclick="saveNote()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Two-column layout: sidebar + main panel -->
+  <div class="notebook-layout" id="notebook-layout">
+    <div class="nb-sidebar">
+      <div class="nb-sidebar-head">
+        <h3>Sessions</h3>
+        <span id="note-count" style="font-size:0.75rem;color:var(--muted)">0</span>
+      </div>
+      <ul class="note-list" id="note-list"></ul>
+    </div>
+
+    <div class="nb-main" id="nb-main">
+      <div class="empty"><div class="em">📒</div><p>Select a note from the left,<br>or add one above.</p></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- =====================================================
+     MODAL: Create Circle
+===================================================== -->
+<div class="modal-overlay" id="create-modal">
+  <div class="modal">
+    <h2>Create a Study Circle</h2>
+    <div class="field"><label>Circle Name</label><input type="text" id="cm-name" placeholder="e.g. FEA Study Group"></div>
+    <div class="field"><label>Discipline</label>
+      <select id="cm-disc">
+        <option value="civil">Civil Engineering</option>
+        <option value="mechanical">Mechanical Engineering</option>
+        <option value="electrical">Electrical Engineering</option>
+        <option value="computer">Computer Engineering</option>
+      </select>
+    </div>
+    <div class="field"><label>Description</label><textarea id="cm-desc" placeholder="What topic will you focus on? Any prereqs?"></textarea></div>
+    <div class="field"><label>Max Members</label>
+      <select id="cm-max"><option value="3">3</option><option value="4">4</option><option value="5" selected>5</option></select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('create-modal')">Cancel</button>
+      <button class="btn btn-amber btn-sm" onclick="createCircle()">Create</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- =====================================================
+     MODAL: Schedule a Booking
+===================================================== -->
+<div class="modal-overlay" id="schedule-modal">
+  <div class="modal">
+    <h2 id="sched-title">Schedule a Session</h2>
+    <p style="font-size:0.84rem;color:var(--muted);margin-bottom:1.25rem">Pick a day and time — your tutor gets notified automatically.</p>
+    <div class="field">
+      <label>Choose a Day</label>
+      <div class="slot-grid" id="day-slots"></div>
+    </div>
+    <div class="field">
+      <label>Choose a Time</label>
+      <div class="slot-grid" id="time-slots"></div>
+    </div>
+    <div class="field"><label>Topic / Notes for tutor</label><textarea id="sched-notes" placeholder="e.g. I need help deriving the Euler-Bernoulli beam equation..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('schedule-modal')">Cancel</button>
+      <button class="btn btn-amber btn-sm" onclick="confirmBooking()">Confirm Booking</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+
+
+</body>
+</html>
