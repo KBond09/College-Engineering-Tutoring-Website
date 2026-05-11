@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LearnLoop — Engineering Edition</title>
+
+  <!-- ========================================================
+    FONTS: We use Google Fonts (free)
+    - "Syne" for bold headings (engineering blueprint feel)
+    - "DM Sans" for easy-to-read body text
+    - "Caveat" for handwritten accent labels
+  ======================================================== -->
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=Caveat:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="thinkforge.css">
+ 
+</head>
+<body>
+ 
+<!-- ─── NAV ──────────────────────────────────────────── -->
+<nav>
+  <div class="logo">Think<span>Forge</span><em>Engineering</em></div>
+  <ul class="nav-links">
+    <li><button class="active" onclick="go('home')">🏠 Home</button></li>
+    <li><button onclick="go('hub')">🎓 Study Hub</button></li>
+    <li><button onclick="go('notebook')">📓 My Notebook</button></li>
+    <li><button onclick="go('solver')">🧩 Step Solver</button></li>
+  </ul>
+  <button class="hamburger" id="hamburger" onclick="toggleDrawer()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="nav-drawer" id="nav-drawer">
+  <button class="active" onclick="go('home');closeDrawer()">🏠 Home</button>
+  <button onclick="go('hub');closeDrawer()">🎓 Study Hub</button>
+  <button onclick="go('notebook');closeDrawer()">📓 My Notebook</button>
+  <button onclick="go('solver');closeDrawer()">🧩 Step Solver</button>
+</div>
+ 
+<!-- ═══════════════════════════════════════
+     HOME
+════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <p class="hero-eye">✦ Free engineering tutoring platform</p>
+    <h1>Think deeper.<br><em>Forge your future.</em></h1>
+    <p>Peer circles, private tutors, adaptive step-by-step problem solving, and real-time feedback — all free, all in your browser.</p>
+    <div class="hero-btns">
+      <button class="btn btn-amber" onclick="go('hub')">🎓 Study Hub</button>
+      <button class="btn btn-blue"  onclick="go('solver')">🧩 Step Solver</button>
+      <button class="btn btn-ghost" onclick="go('notebook')">📓 My Notebook</button>
+    </div>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-n" style="color:var(--civil)">4</div><div class="stat-l">Disciplines</div></div>
+      <div class="stat"><div class="stat-n" style="color:var(--mech)">24</div><div class="stat-l">Active Circles</div></div>
+      <div class="stat"><div class="stat-n" style="color:var(--elec)">18</div><div class="stat-l">Tutors</div></div>
+      <div class="stat"><div class="stat-n" style="color:var(--comp)">100%</div><div class="stat-l">Free</div></div>
+    </div>
+  </div>
+  <div class="g4" style="margin-bottom:2rem">
+    <div class="disc-card" onclick="go('hub');setCircleFilter(null,'civil')"><div class="disc-icon">🏗️</div><h3 style="color:var(--civil)">Civil</h3><p>Structures, fluid mechanics, transportation, geotechnics</p></div>
+    <div class="disc-card" onclick="go('hub');setCircleFilter(null,'mech')"><div class="disc-icon">⚙️</div><h3 style="color:var(--mech)">Mechanical</h3><p>Thermodynamics, dynamics, manufacturing, CAD</p></div>
+    <div class="disc-card" onclick="go('hub');setCircleFilter(null,'elec')"><div class="disc-icon">⚡</div><h3 style="color:var(--elec)">Electrical</h3><p>Circuits, signals, power systems, electromagnetics</p></div>
+    <div class="disc-card" onclick="go('hub');setCircleFilter(null,'comp')"><div class="disc-icon">💻</div><h3 style="color:var(--comp)">Computer</h3><p>Algorithms, OS, networks, software engineering</p></div>
+  </div>
+  <div class="cta-strip">
+    <div><p class="cta-eye">Ready to start?</p><h2>Create a peer circle in 30 seconds.</h2></div>
+    <button class="btn btn-amber" onclick="go('hub');openCreateModal()">Start a Circle →</button>
+  </div>
+</div>
+ 
+<!-- ═══════════════════════════════════════
+     STUDY HUB (Circles + Tutoring + Bookings)
+════════════════════════════════════════ -->
+<div class="page" id="page-hub">
+  <div class="sec-head flex-between">
+    <div><h2>Study Hub</h2><p>Peer circles, private tutoring, and your scheduled sessions — all in one place.</p></div>
+    <button class="btn btn-amber btn-sm" onclick="openCreateModal()">+ New Circle</button>
+  </div>
+ 
+  <div class="hub-tabs">
+    <button class="hub-tab on" onclick="switchHub(this,'hub-circles')">🔵 Peer Circles</button>
+    <button class="hub-tab"    onclick="switchHub(this,'hub-private')">🎯 Private Tutoring</button>
+    <button class="hub-tab"    onclick="switchHub(this,'hub-bookings')">📅 My Bookings</button>
+  </div>
+ 
+  <!-- CIRCLES TAB -->
+  <div class="hub-panel on" id="hub-circles">
+    <div class="filter-bar">
+      <input class="search-in" type="text" id="circle-search" placeholder="Search circles..." oninput="renderCircles()">
+      <button class="chip on" data-cf="all"  onclick="setCircleFilter(this,'all')">All</button>
+      <button class="chip" data-cf="civil" data-d="civil" onclick="setCircleFilter(this,'civil')">🏗️ Civil</button>
+      <button class="chip" data-cf="mech"  data-d="mech"  onclick="setCircleFilter(this,'mech')">⚙️ Mech</button>
+      <button class="chip" data-cf="elec"  data-d="elec"  onclick="setCircleFilter(this,'elec')">⚡ Elec</button>
+      <button class="chip" data-cf="comp"  data-d="comp"  onclick="setCircleFilter(this,'comp')">💻 Comp</button>
+    </div>
+    <!-- Video Room (Daily.co) -->
+    <div class="video-room" id="circle-video">
+      <div class="v-head">
+        <h3 id="cv-title">Study Room</h3>
+        <div class="v-right">
+          <div class="live-badge"><div class="live-dot"></div> Live</div>
+          <button class="btn btn-danger btn-sm" onclick="leaveRoom('circle')">Leave</button>
+        </div>
+      </div>
+      <div class="daily-wrap" id="daily-circle-wrap"></div>
+      <div class="cam-controls" id="cam-controls-circle">
+        <button class="cam-btn" id="mic-btn-circle" onclick="toggleMic('circle')">🎤 Mic On</button>
+        <button class="cam-btn" id="cam-btn-circle" onclick="toggleCam('circle')">📹 Cam On</button>
+        <button class="cam-btn" onclick="toggleScreen('circle')">🖥️ Share Screen</button>
+        <span class="cam-status" id="cam-status-circle">Connected to room</span>
+      </div>
+    </div>
+    <div class="g2" id="circles-grid"></div>
+  </div>
+ 
+  <!-- PRIVATE TUTORING TAB -->
+  <div class="hub-panel" id="hub-private">
+    <div class="filter-bar">
+      <input class="search-in" type="text" id="tutor-search" placeholder="Search tutors..." oninput="renderTutors()">
+      <button class="chip on" data-tf="all"  onclick="setTutorFilter(this,'all')">All</button>
+      <button class="chip" data-tf="civil" data-d="civil" onclick="setTutorFilter(this,'civil')">🏗️ Civil</button>
+      <button class="chip" data-tf="mech"  data-d="mech"  onclick="setTutorFilter(this,'mech')">⚙️ Mech</button>
+      <button class="chip" data-tf="elec"  data-d="elec"  onclick="setTutorFilter(this,'elec')">⚡ Elec</button>
+      <button class="chip" data-tf="comp"  data-d="comp"  onclick="setTutorFilter(this,'comp')">💻 Comp</button>
+    </div>
+    <div class="video-room" id="private-video">
+      <div class="v-head">
+        <h3 id="pv-title">Private Session</h3>
+        <div class="v-right">
+          <div class="live-badge"><div class="live-dot"></div> In Session</div>
+          <button class="btn btn-danger btn-sm" onclick="leaveRoom('private')">End Session</button>
+        </div>
+      </div>
+      <div class="daily-wrap" id="daily-private-wrap"></div>
+      <div class="cam-controls" id="cam-controls-private">
+        <button class="cam-btn" id="mic-btn-private" onclick="toggleMic('private')">🎤 Mic On</button>
+        <button class="cam-btn" id="cam-btn-private" onclick="toggleCam('private')">📹 Cam On</button>
+        <button class="cam-btn" onclick="toggleScreen('private')">🖥️ Share Screen</button>
+        <span class="cam-status" id="cam-status-private">Connected to room</span>
+      </div>
+    </div>
+    <div class="g2" id="tutors-grid"></div>
+  </div>
+ 
+  <!-- BOOKINGS TAB -->
+  <div class="hub-panel" id="hub-bookings">
+    <div class="flex-between" style="margin-bottom:1.25rem">
+      <span class="overline" style="margin-bottom:0">Upcoming Sessions</span>
+      <button class="btn btn-amber btn-sm" onclick="switchHub(document.querySelector('.hub-tab:nth-child(2)'),'hub-private')">+ Book a Tutor</button>
+    </div>
+    <div class="col-list" id="bk-upcoming" style="margin-bottom:2rem"></div>
+    <span class="overline">Past Sessions</span>
+    <div class="col-list" id="bk-past"></div>
+  </div>
+</div>
+ 
+<!-- ═══════════════════════════════════════
+     MY NOTEBOOK
+════════════════════════════════════════ -->
+<div class="page" id="page-notebook">
+  <div class="sec-head flex-between">
+    <div><h2>My Notebook</h2><p>Notes, quizzes, AI practice, study planner, and focus timer.</p></div>
+    <button class="btn btn-amber btn-sm" onclick="openAddNote()">+ Add Note</button>
+  </div>
+ 
+  <div class="nb-tabs">
+    <button class="nb-tab on" onclick="switchNbTab(this,'nbt-notes')">📝 Notes</button>
+    <button class="nb-tab"    onclick="switchNbTab(this,'nbt-planner')">📅 Study Planner</button>
+    <button class="nb-tab"    onclick="switchNbTab(this,'nbt-timer')">⏱️ Focus Timer</button>
+  </div>
+ 
+  <!-- NOTES TAB -->
+  <div class="nb-tabpanel on" id="nbt-notes">
+    <div id="add-note-form">
+      <div class="card" style="margin-bottom:1.25rem">
+        <h3 style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.85rem">New Session Note</h3>
+        <div class="field"><label>Title</label><input type="text" id="nf-title" placeholder="e.g. Statics — Truss Analysis"></div>
+        <div class="field"><label>Discipline</label>
+          <select id="nf-disc"><option value="civil">Civil</option><option value="mech">Mechanical</option><option value="elec">Electrical</option><option value="comp">Computer</option></select>
+        </div>
+        <div class="field"><label>Key Concepts (one per line)</label><textarea id="nf-concepts" placeholder="Free body diagrams isolate a single body&#10;ΣF = 0 in static equilibrium"></textarea></div>
+        <div class="field"><label>Action Items (one per line)</label><textarea id="nf-actions" placeholder="Complete problem set 4&#10;Review chapter 6"></textarea></div>
+        <div class="form-acts">
+          <button class="btn btn-ghost btn-sm" onclick="closeAddNote()">Cancel</button>
+          <button class="btn btn-amber btn-sm" onclick="saveNote()">Save Note</button>
+        </div>
+      </div>
+    </div>
+    <div class="nb-layout">
+      <div class="nb-side">
+        <div class="nb-side-head"><h3>Sessions</h3><span id="note-count" style="font-size:.7rem;color:var(--muted)">0</span></div>
+        <ul class="note-list" id="note-list"></ul>
+      </div>
+      <div class="nb-main" id="nb-main">
+        <div class="empty"><div class="em">📒</div><p>Select a note, or add one above.</p></div>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- STUDY PLANNER TAB -->
+  <div class="nb-tabpanel" id="nbt-planner">
+    <div class="planner-header">
+      <h3>Study Planner</h3>
+      <button class="btn btn-amber btn-sm" onclick="openAddTask()">+ Add Task</button>
+    </div>
+    <!-- Weekly calendar -->
+    <div class="planner-grid" id="planner-cal"></div>
+    <hr>
+    <span class="overline">All Tasks</span>
+    <div id="rt-feed-planner" class="rt-feed info"><span class="rt-feed-icon">💡</span><div class="rt-feed-text"><strong>Real-time detection</strong>Add tasks and ThinkForge will automatically flag overdue items, overloaded days, and upcoming deadlines.</div></div>
+    <div class="col-list" id="tasks-list"></div>
+  </div>
+ 
+  <!-- FOCUS TIMER TAB -->
+  <div class="nb-tabpanel" id="nbt-timer">
+    <div class="timer-wrap">
+      <div class="timer-mode-row">
+        <button class="t-mode-btn on" onclick="setTimerMode(this,'pomodoro')">Pomodoro</button>
+        <button class="t-mode-btn"    onclick="setTimerMode(this,'short')">Short Break</button>
+        <button class="t-mode-btn"    onclick="setTimerMode(this,'long')">Long Break</button>
+        <button class="t-mode-btn"    onclick="setTimerMode(this,'custom')">Custom</button>
+      </div>
+      <div class="timer-progress-ring">
+        <svg width="140" height="140" viewBox="0 0 140 140">
+          <circle class="ring-bg" cx="70" cy="70" r="60"/>
+          <circle class="ring-fill" id="ring-fill" cx="70" cy="70" r="60" stroke-dasharray="377" stroke-dashoffset="0"/>
+        </svg>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center">
+          <div class="timer-display" id="timer-display">25:00</div>
+        </div>
+      </div>
+      <div class="timer-label" id="timer-label">Focus session</div>
+      <div id="rt-feed-timer" class="rt-feed show info" style="text-align:left;margin-bottom:1rem"><span class="rt-feed-icon">💡</span><div class="rt-feed-text"><strong>Real-time feedback</strong>ThinkForge tracks your sessions and will nudge you with encouragement and productivity tips as you work.</div></div>
+      <div class="timer-btns">
+        <button class="btn btn-amber btn-sm" onclick="startTimer()">▶ Start</button>
+        <button class="btn btn-ghost btn-sm" onclick="pauseTimer()">⏸ Pause</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetTimer()">↺ Reset</button>
+      </div>
+      <div class="timer-sessions" id="timer-sessions">Sessions completed today: 0</div>
+      <div style="margin-top:1rem" id="custom-time-row" style="display:none">
+        <div class="field" id="custom-field" style="display:none"><label>Custom minutes</label><input type="number" id="custom-mins" min="1" max="120" value="25" style="max-width:120px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<!-- ═══════════════════════════════════════
+     STEP SOLVER
+════════════════════════════════════════ -->
+<div class="page" id="page-solver">
+  <div class="sec-head"><h2>Step-by-Step Solver</h2><p>Work through engineering problems one step at a time, with adaptive hints and AI explanations at every stage.</p></div>
+  <div id="solver-picker">
+    <div class="solver-disc-row" id="solver-disc-row"></div>
+    <div class="sp-grid" id="solver-prob-grid"></div>
+  </div>
+  <div class="solver-view" id="solver-view">
+    <div class="solver-toolbar">
+      <button class="back-btn" onclick="backToPicker()">← back to problems</button>
+      <span id="sv-badge" style="font-size:.73rem;color:var(--muted)"></span>
+    </div>
+    <div id="sv-rt-feed" class="rt-feed"></div>
+    <div class="prob-stmt" id="sv-stmt"></div>
+    <div class="prog-row"><div class="prog-bg"><div class="prog-fill" id="sv-prog"></div></div><span class="prog-lbl" id="sv-prog-lbl"></span></div>
+    <div class="steps-col" id="sv-steps"></div>
+    <div class="complete-strip" id="sv-complete">🎉 Problem complete — you worked through every step!<br><button class="back-btn" style="margin-top:8px" onclick="backToPicker()">Try another problem</button></div>
+  </div>
+</div>
+ 
+<!-- MODAL: Create Circle -->
+<div class="modal-ov" id="create-modal">
+  <div class="modal">
+    <h2>Create a Study Circle</h2>
+    <div class="field"><label>Circle Name</label><input type="text" id="cm-name" placeholder="e.g. FEA Study Group"></div>
+    <div class="field"><label>Discipline</label><select id="cm-disc"><option value="civil">Civil</option><option value="mech">Mechanical</option><option value="elec">Electrical</option><option value="comp">Computer</option></select></div>
+    <div class="field"><label>Description</label><textarea id="cm-desc" placeholder="What topic will you focus on?"></textarea></div>
+    <div class="field"><label>Max Members</label><select id="cm-max"><option value="3">3</option><option value="4">4</option><option value="5" selected>5</option></select></div>
+    <div class="modal-ft"><button class="btn btn-ghost btn-sm" onclick="closeModal('create-modal')">Cancel</button><button class="btn btn-amber btn-sm" onclick="createCircle()">Create</button></div>
+  </div>
+</div>
+ 
+<!-- MODAL: Schedule -->
+<div class="modal-ov" id="sched-modal">
+  <div class="modal">
+    <h2 id="sched-title">Schedule a Session</h2>
+    <p class="modal-sub">Pick a day and time — your tutor gets notified automatically.</p>
+    <div class="field"><label>Day</label><div class="slot-grid" id="day-slots"></div></div>
+    <div class="field"><label>Time</label><div class="slot-grid" id="time-slots"></div></div>
+    <div class="field"><label>Topic / Notes</label><textarea id="sched-notes" placeholder="e.g. Help with Euler-Bernoulli beam equation..."></textarea></div>
+    <div class="modal-ft"><button class="btn btn-ghost btn-sm" onclick="closeModal('sched-modal')">Cancel</button><button class="btn btn-amber btn-sm" onclick="confirmBooking()">Confirm</button></div>
+  </div>
+</div>
+ 
+<!-- MODAL: Add Task -->
+<div class="modal-ov" id="task-modal">
+  <div class="modal">
+    <h2>Add Study Task</h2>
+    <div class="field"><label>Task Title</label><input type="text" id="tk-title" placeholder="e.g. Review statics chapter 5"></div>
+    <div class="field"><label>Subject / Discipline</label><input type="text" id="tk-subject" placeholder="e.g. Civil Engineering"></div>
+    <div class="field"><label>Due Date</label><input type="date" id="tk-date"></div>
+    <div class="field"><label>Estimated Time</label><select id="tk-time"><option>30 min</option><option>1 hour</option><option>2 hours</option><option>3+ hours</option></select></div>
+    <div class="field"><label>Priority</label><select id="tk-priority"><option value="high">High</option><option value="med" selected>Medium</option><option value="low">Low</option></select></div>
+    <div class="modal-ft"><button class="btn btn-ghost btn-sm" onclick="closeModal('task-modal')">Cancel</button><button class="btn btn-amber btn-sm" onclick="addTask()">Add Task</button></div>
+  </div>
+</div>
+ 
+<div class="toast" id="toast"></div>
+
+
+<script src="app.js"></script>
+</body>
+</html>
